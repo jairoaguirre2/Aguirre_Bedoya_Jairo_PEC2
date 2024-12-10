@@ -372,8 +372,10 @@ almacenarán los datos y los resultados del análisis.</p>
 <pre class="r"><code>workingDir &lt;-getwd()
 dataDir &lt;- file.path(workingDir, &quot;datos&quot;)
 resultsDir &lt;- file.path(workingDir, &quot;resultados&quot;)</code></pre>
-<p>Procedemos a instalar los paquetes necesarios para nuestro
-análisis</p>
+<p>Procedemos a instalar y cargar los paquetes necesarios para realizar
+nuestro análisis. La función installifnot se encargará de verificar si
+cada paquete está instalado, y en caso contrario, lo instalará
+utilizando BiocManager.</p>
 <pre class="r"><code>if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE)) {
   install.packages(&quot;BiocManager&quot;)
 }
@@ -393,6 +395,77 @@ paquetes &lt;- c(
 )
 
 lapply(paquetes, installifnot)</code></pre>
+<p>Leemos el archivo de targets</p>
+<pre class="r"><code>library(Biobase)
+
+#Leemos el archivo targets
+allTargets &lt;- read.table(
+  &quot;C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/allTargets.txt&quot;, 
+  header = TRUE, 
+  sep=&quot; &quot;)
+
+#Vemos un resumen de los datos
+str(allTargets)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    35 obs. of  4 variables:
+##  $ sample   : chr  &quot;GSM944831&quot; &quot;GSM944838&quot; &quot;GSM944845&quot; &quot;GSM944852&quot; ...
+##  $ infection: chr  &quot;uninfected&quot; &quot;uninfected&quot; &quot;uninfected&quot; &quot;uninfected&quot; ...
+##  $ time     : chr  &quot;hour 0&quot; &quot;hour 0&quot; &quot;hour 0&quot; &quot;hour 0&quot; ...
+##  $ agent    : chr  &quot;untreated&quot; &quot;untreated&quot; &quot;untreated&quot; &quot;untreated&quot; ...</code></pre>
+<p>Ahora prescindiremos de las cinco muestras tomadas a las dos horas y
+sortearemos las muestras restantes de forma que conservemos tan sólo
+cuatro muestras de cada grupo.</p>
+<p>Primero creamos la función que nos permita eliminar las muestras
+deseadas y seleccionar aleatoriamente las muestras con las que
+trabajaremos.</p>
+<pre class="r"><code>filter_microarray &lt;- function(allTargets, seed = 52904568) {
+  # Configurar la semilla aleatoria
+  set.seed(seed)
+  
+  # Filtrar las filas donde &#39;time&#39; no sea &#39;hour 2&#39;
+  filtered &lt;- subset(allTargets, time != &quot;hour 2&quot;)
+  
+  # Dividir el dataset por grupos únicos de &#39;infection&#39; + &#39;agent&#39;
+  filtered$group &lt;- interaction(filtered$infection, filtered$agent)
+  
+  # Seleccionar 4 muestras al azar de cada grupo
+  selected &lt;- do.call(rbind, lapply(split(filtered, filtered$group), function(group_data) {
+    if (nrow(group_data) &gt; 4) {
+      group_data[sample(1:nrow(group_data), 4), ]
+    } else {
+      group_data
+    }
+  }))
+  
+  # Obtener los índices originales como nombres de las filas seleccionadas
+  original_indices &lt;- match(selected$sample, allTargets$sample)
+  
+  # Modificar los rownames usando &#39;sample&#39; y los índices originales
+  rownames(selected) &lt;- paste0(selected$sample, &quot;.&quot;, original_indices)
+  
+  # Eliminar la columna &#39;group&#39; y devolver el resultado
+  selected$group &lt;- NULL
+  return(selected)
+}</code></pre>
+<p>Procedemos a usar la función para generar nuestro nuevo dataframe</p>
+<pre class="r"><code>targetsDF &lt;- filter_microarray(allTargets, seed=52904568)
+str(targetsDF)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    24 obs. of  4 variables:
+##  $ sample   : chr  &quot;GSM944864&quot; &quot;GSM944850&quot; &quot;GSM944857&quot; &quot;GSM944843&quot; ...
+##  $ infection: chr  &quot;S. aureus USA300&quot; &quot;S. aureus USA300&quot; &quot;S. aureus USA300&quot; &quot;S. aureus USA300&quot; ...
+##  $ time     : chr  &quot;hour 24&quot; &quot;hour 24&quot; &quot;hour 24&quot; &quot;hour 24&quot; ...
+##  $ agent    : chr  &quot;linezolid&quot; &quot;linezolid&quot; &quot;linezolid&quot; &quot;linezolid&quot; ...</code></pre>
+<p>Creamos un objeto AnnotatedDataFrame a partir del dataframe
+filtrado</p>
+<pre class="r"><code>targets &lt;- AnnotatedDataFrame(targetsDF)
+targets</code></pre>
+<pre><code>## An object of class &#39;AnnotatedDataFrame&#39;
+##   rowNames: GSM944864.30 GSM944850.28 ... GSM944855.14 (24 total)
+##   varLabels: sample infection time agent
+##   varMetadata: labelDescription</code></pre>
+<p>Definimos algunas variables para realizar gráficos más adelante</p>
+<pre class="r"><code>sampleInfection &lt;- as.character(targetsDF$infection)
+sampleTime &lt;- as.character (targetsDF$time)
+sampleAgent &lt;- as.character(targetsDF$agent)</code></pre>
 
 
 
