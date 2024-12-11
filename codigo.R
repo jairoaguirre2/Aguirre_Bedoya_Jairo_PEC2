@@ -87,3 +87,11 @@ sampleInfection <- as.character(targetsDF$infection)
 sampleTime <- as.character (targetsDF$time)
 sampleAgent <- as.character(targetsDF$agent)
 
+# Leemos el archvio cel
+library(oligo)
+celFiles <- list.celfiles("C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos", full.names = TRUE)
+library(Biobase)
+celFilesFiltered <- celFiles[grepl(paste(targets$sample, collapse = "|"), basename(celFiles))]
+celFilesFiltered
+rawData <- read.celfiles(celFilesFiltered, phenoData = targets)
+rawData

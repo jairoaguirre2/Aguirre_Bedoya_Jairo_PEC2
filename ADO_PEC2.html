@@ -396,10 +396,7 @@ paquetes &lt;- c(
 
 lapply(paquetes, installifnot)</code></pre>
 <p>Leemos el archivo de targets</p>
-<pre class="r"><code>library(Biobase)
-
-#Leemos el archivo targets
-allTargets &lt;- read.table(
+<pre class="r"><code>allTargets &lt;- read.table(
   &quot;C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/allTargets.txt&quot;, 
   header = TRUE, 
   sep=&quot; &quot;)
@@ -466,6 +463,87 @@ targets</code></pre>
 <pre class="r"><code>sampleInfection &lt;- as.character(targetsDF$infection)
 sampleTime &lt;- as.character (targetsDF$time)
 sampleAgent &lt;- as.character(targetsDF$agent)</code></pre>
+<p>Al leer los archivos .CEL aportamo la información que contiene el
+objeto targets</p>
+<pre class="r"><code>library(oligo)
+celFiles &lt;- list.celfiles(&quot;C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos&quot;, full.names=FALSE)
+#######
+# Filtra &#39;targets&#39; para que solo incluya las muestras correspondientes a celFiles
+targets &lt;- targets[rownames(targets) %in% celFiles, ]
+# Reordenar targets según el orden de los archivos .CEL
+targets &lt;- targets[match(celFiles, rownames(targets)), ]
+
+# Confirma que no hay valores NA tras la reordenación
+if (any(is.na(targets))) {
+  stop(&quot;Algunos archivos .CEL no tienen coincidencia en el archivo de metadatos.&quot;)
+}</code></pre>
+<pre><code>## Warning in is.na(targets): is.na() aplicado a un objeto que no es (lista o
+## vector) de tipo &#39;S4</code></pre>
+<pre class="r"><code># Rutas completas de los archivos .CEL
+celFilesFull &lt;- list.celfiles(
+  path = &quot;C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos&quot;,
+  full.names = TRUE
+)
+
+# Leer los datos crudos
+rawData &lt;- read.celfiles(
+  filenames = celFilesFull,
+  phenoData = targets
+)</code></pre>
+<pre><code>## Cargando paquete requerido: pd.mouse430.2</code></pre>
+<pre><code>## Platform design info loaded.</code></pre>
+<pre><code>## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944831_2564_6914_32297_Ctl-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944832_2564_6914_32298_2h-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944833_2564_6914_32299_Ctl-Lin-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944834_2564_6914_32300_Ctl-Van-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944835_2564_6914_32301_24h-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944836_2564_6914_32302_24h-lin-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944837_2564_6914_32303_24h-Van-1_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944838_2564_6914_32304_Ctl-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944839_2564_6914_32305_2h-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944840_2564_6914_32306_Ctl-Lin-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944841_2564_6914_32307_Ctl-Van-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944842_2564_6914_32308_24h-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944843_2564_6914_32309_24h-lin-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944844_2564_6914_32310_24h-Van-2_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944845_2564_6914_32311_Ctl-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944846_2564_6914_32312_2h-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944847_2564_6914_32313_Ctl-Lin-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944848_2564_6914_32314_Ctl-Van-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944849_2564_6914_32315_24h-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944850_2564_6914_32316_24h-lin-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944851_2564_6914_32317_24h-Van-3_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944852_2564_6914_32318_Ctl-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944853_2564_6914_32319_2h-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944854_2564_6914_32320_Ctl-Lin-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944855_2564_6914_32321_Ctl-Van-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944856_2564_6914_32322_24h-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944857_2564_6914_32323_24h-lin-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944858_2564_6914_32324_24h-Van-4_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944859_2564_6914_32325_Ctl-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944860_2564_6914_32326_2h-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944861_2564_6914_32327_Ctl-Lin-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944862_2564_6914_32328_Ctl-Van-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944863_2564_6914_32329_24h-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944864_2564_6914_32330_24h-lin-5_Mouse430+2.CEL
+## Reading in : C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos/GSM944865_2564_6914_32331_24h-Van-5_Mouse430+2.CEL</code></pre>
+<pre><code>## Warning in read.celfiles(filenames = celFilesFull, phenoData = targets):
+## &#39;channel&#39; automatically added to varMetadata in phenoData.</code></pre>
+<pre class="r"><code>rawData</code></pre>
+<pre><code>## ExpressionFeatureSet (storageMode: lockedEnvironment)
+## assayData: 1004004 features, 35 samples 
+##   element names: exprs 
+## protocolData
+##   rowNames: NA NA.1 ... NA.34 (35 total)
+##   varLabels: exprs dates
+##   varMetadata: labelDescription channel
+## phenoData
+##   rowNames: NA NA.1 ... NA.34 (35 total)
+##   varLabels: sample infection time agent
+##   varMetadata: labelDescription channel
+## featureData: none
+## experimentData: use &#39;experimentData(object)&#39;
+## Annotation: pd.mouse430.2</code></pre>
 
 
 

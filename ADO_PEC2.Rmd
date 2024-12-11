@@ -51,12 +51,8 @@ lapply(paquetes, installifnot)
 
 Leemos el archivo de targets
 
-```{r}
-library(Biobase)
-
-#Leemos el archivo targets
-allTargets <- read.table(
-  "C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/allTargets.txt", 
+```{r leer datos}
+allTargets <- read.table(file.path(dataDir, "allTargets.txt"), 
   header = TRUE, 
   sep=" ")
 
@@ -69,7 +65,7 @@ Ahora prescindiremos de las cinco muestras tomadas a las dos horas y sortearemos
 
 Primero creamos la función que nos permita eliminar las muestras deseadas y seleccionar aleatoriamente las muestras con las que trabajaremos. 
 
-```{r}
+```{r función}
 filter_microarray <- function(allTargets, seed = 52904568) {
   # Configurar la semilla aleatoria
   set.seed(seed)
@@ -104,23 +100,30 @@ filter_microarray <- function(allTargets, seed = 52904568) {
 
 Procedemos a usar la función para generar nuestro nuevo dataframe
 
-```{r}
+```{r dataframe}
 targetsDF <- filter_microarray(allTargets, seed=52904568)
 str(targetsDF)
 ```
 
 Creamos un objeto AnnotatedDataFrame a partir del dataframe filtrado
 
-```{r}
+```{r ADF}
 targets <- AnnotatedDataFrame(targetsDF)
 targets
 ```
 
 Definimos algunas variables para realizar gráficos más adelante 
 
-```{r}
+```{r variables}
 sampleInfection <- as.character(targetsDF$infection)
 sampleTime <- as.character (targetsDF$time)
 sampleAgent <- as.character(targetsDF$agent)
+```
+
+Al leer los archivos .CEL aportamo la información que contiene el objeto targets
+
+```{r leer CELfiles}
+
+
 ```
 
