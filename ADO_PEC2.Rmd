@@ -52,7 +52,8 @@ lapply(paquetes, installifnot)
 Leemos el archivo de targets
 
 ```{r leer datos}
-allTargets <- read.table(file.path(dataDir, "allTargets.txt"), 
+allTargets <- read.table (
+  "C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/allTargets.txt",
   header = TRUE, 
   sep=" ")
 
@@ -102,7 +103,9 @@ Procedemos a usar la función para generar nuestro nuevo dataframe
 
 ```{r dataframe}
 targetsDF <- filter_microarray(allTargets, seed=52904568)
-str(targetsDF)
+knitr::kable(
+  targetsDF, booktabs = TRUE, 
+  caption = 'Contenido del archivo targetsDF utilizado para el análisis actual')
 ```
 
 Creamos un objeto AnnotatedDataFrame a partir del dataframe filtrado
@@ -123,7 +126,12 @@ sampleAgent <- as.character(targetsDF$agent)
 Al leer los archivos .CEL aportamo la información que contiene el objeto targets
 
 ```{r leer CELfiles}
-
-
+library(oligo)
+celFiles <- list.celfiles("C:/Users/JUNIOR/Documents/MÁSTER/ANÁLISIS DATOS ÓMICOS/PEC2/datos", full.names = TRUE)
+library(Biobase)
+celFilesFiltered <- celFiles[grepl(paste(targets$sample, collapse = "|"), basename(celFiles))]
+celFilesFiltered
+rawData <- read.celfiles(celFilesFiltered, phenoData = targets)
+rawData
 ```
 
